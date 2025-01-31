@@ -1,26 +1,53 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <nav>
+      <!-- Botón Login solo visible si no está logueado -->
+      <router-link v-if="!authStore.userId" to="/login">Login</router-link>
+
+      <!-- Botones visibles solo si el usuario está logueado -->
+      <router-link v-if="authStore.userId" to="/">Inicio</router-link>
+      <router-link v-if="authStore.userId" to="/CriptoPrecios">Precios</router-link>
+
+      <!-- Botón Cerrar sesión solo visible si el usuario está logueado -->
+      <button v-if="authStore.userId" @click="cerrarSesion">Cerrar sesión</button>
+    </nav>
+
+    <router-view />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "vue-router";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+  setup() {
+    const authStore = useAuthStore();
+    const router = useRouter();
+
+    const cerrarSesion = () => {
+      authStore.logout();
+      router.push("/login"); // Redirigir al login
+    };
+
+    return {
+      authStore,
+      cerrarSesion,
+    };
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+nav {
+  display: flex;
+  gap: 15px;
+}
+button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
 }
 </style>
