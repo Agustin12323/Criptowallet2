@@ -19,6 +19,7 @@ export default {
 
     const iniciarSesion = () => {
       if (userId.value.trim()) {
+        localStorage.getItem("userId", userId.value);
         authStore.login(userId.value);
         router.push("/CriptoPrecios");
       } else {
