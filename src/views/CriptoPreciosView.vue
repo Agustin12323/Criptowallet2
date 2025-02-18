@@ -1,7 +1,5 @@
 <template>
   <div>
-    <CriptoPrecios />
-
     <!-- Mostrar los precios si existen -->
     <div v-if="precios.length">
       <div v-for="cripto in precios" :key="cripto.nombre" class="precio">
@@ -12,50 +10,122 @@
     <div v-else>
       <p>Cargando datos...</p>
     </div>
+
+    <div>
+      <label for="accion">Selecciona una accion:</label>
+      <select v-model="accion">
+        <option value="comprar">Comprar</option>
+        <option value="vender">Vender</option>
+      </select>
+    </div>
+    <div>
+      <label for="moneda">Selecciona una moneda:</label>
+      <select v-model="monedaSeleccionada" id="moneda">
+        <option
+          v-for="cripto in precios"
+          :key="cripto.nombre"
+          :value="cripto.nombre"
+        >
+          {{ cripto.nombre }}
+        </option>
+      </select>
+
+      <label class="label-css">Exchange </label>
+      <select class="select-css" v-model="exchange">
+        <option disabled value="">Seleccione una opcion</option>
+        <option value="satoshitango">SatoshiTango</option>
+        <option value="buenbit">BuenBit</option>
+        <option value="criptofacil">CriptoFacil</option>
+        <option value="letsbit">Let'sBit</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="cantidad">Cantidad</label>
+      <input type="number" name="cantidad" id="cantidad" v-model="cantidad" />
+      <button @click="calcularPrecio">Comprar</button>
+      <p>Precio total: ${{ totalPrecio }}</p>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { useAuthStore } from "@/store/authStore"; // Importamos el store de autenticación
-import CriptoPrecios from "@/components/CriptoPrecios.vue";
+import { useAuthStore } from "@/store/authStore";
 
 export default {
   name: "CriptoPreciosView",
-  components: {
-    CriptoPrecios,
-  },
+  components: {},
   data() {
     return {
-      precios: [], // Inicializar la variable precios vacía
+      precios: [],
+      cantidad: 0,
+      monedaSeleccionada: "",
+      exchange: "",
+      accion: "",
+      totalPrecio: 0,
     };
   },
   async created() {
     await this.obtenerPrecios();
   },
   methods: {
+    calcularPrecio() {
+      if (this.accion === "") {
+        alert("Selecciona una accion");
+        return;
+      }
+      if (this.monedaSeleccionada === "") {
+        alert("Selecciona una moneda");
+        return;
+      }
+      if (this.exchange === "") {
+        alert("Selecciona un exchange");
+        return;
+      } else {
+        const criptoSeleccionado = this.precios.find(
+          (cripto) => cripto.nombre === this.monedaSeleccionada
+        );
+        if (criptoSeleccionado) {
+          this.totalPrecio = criptoSeleccionado.precio * this.cantidad;
+        }
+      }
+    },
     async obtenerPrecios() {
       try {
         const authStore = useAuthStore();
-        const userId = authStore.userId; // Obtener el ID del usuario
+        const userId = authStore.userId;
 
         if (!userId) {
           console.error("No hay un ID de usuario disponible.");
           return;
         }
 
-        const response = await axios.get("https://api.coingecko.com/api/v3/simple/price", {
-          params: {
-            ids: "bitcoin,ethereum,dogecoin",
-            vs_currencies: "ars",
-          },
-        });
-
-        // Formateamos los datos de la API para que coincidan con la estructura deseada
+        const response = await axios.get(
+          "https://api.coingecko.com/api/v3/simple/price",
+          {
+            params: {
+              ids: "bitcoin,ethereum,dogecoin",
+              vs_currencies: "ars",
+            },
+          }
+        );
         this.precios = [
-          { nombre: "Bitcoin", moneda: "ARS", precio: response.data.bitcoin.ars },
-          { nombre: "Ethereum", moneda: "ARS", precio: response.data.ethereum.ars },
-          { nombre: "Dogecoin", moneda: "ARS", precio: response.data.dogecoin.ars },
+          {
+            nombre: "Bitcoin",
+            moneda: "ARS",
+            precio: response.data.bitcoin.ars,
+          },
+          {
+            nombre: "Ethereum",
+            moneda: "ARS",
+            precio: response.data.ethereum.ars,
+          },
+          {
+            nombre: "Dogecoin",
+            moneda: "ARS",
+            precio: response.data.dogecoin.ars,
+          },
         ];
       } catch (error) {
         console.error("Error al obtener precios:", error);
@@ -66,8 +136,7 @@ export default {
 </script>
 
 <style scoped>
-/* Puedes agregar estilos específicos para esta vista aquí */
-.precio {
+.precios .precio {
   border: 1px solid black;
   padding: 10px;
   margin: 5px;
