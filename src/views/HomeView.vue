@@ -4,16 +4,32 @@
     <p>Gestiona tus criptomonedas de manera fácil y segura.</p>
 
     <div class="buttons">
-      <button>Comprar</button>
-      <button>Vender</button>
-      <button>Ver Caja de Ahorro</button>
+      <button @click="CriptoPrecios">Compra/Venta</button>
+      <button @click="Historial">Historial</button>
+      <button>Caja de Ahorro</button>
     </div>
   </div>
 </template>
 
 <script>
+
+import { useRouter } from 'vue-router';
+
 export default {
   name: "HomeView",
+  setup(){
+    const router = useRouter();
+    const CriptoPrecios=()=>{
+      router.push('/CriptoPrecios');
+    };
+    const Historial=()=>{
+      router.push('/Historial');
+    };
+  return{
+    CriptoPrecios,
+    Historial,
+  };
+  },
 };
 </script>
 

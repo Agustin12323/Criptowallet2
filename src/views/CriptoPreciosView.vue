@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Mostrar los precios si existen -->
     <div v-if="precios.length">
       <div v-for="cripto in precios" :key="cripto.nombre" class="precio">
         <h2>{{ cripto.nombre }}</h2>

@@ -1,15 +1,9 @@
 <template>
   <div id="app">
     <nav>
-      <!-- Botón Login solo visible si no está logueado -->
-      <router-link v-if="!authStore.userId" to="/login">Login</router-link>
-
-      <!-- Botones visibles solo si el usuario está logueado -->
-      <router-link v-if="authStore.userId" to="/">Inicio</router-link>
-      <router-link v-if="authStore.userId" to="/CriptoPrecios">Precios</router-link>
-
-      <!-- Botón Cerrar sesión solo visible si el usuario está logueado -->
-      <button v-if="authStore.userId" @click="cerrarSesion">Cerrar sesión</button>
+     <button v-if="$route.name!=='Login'" @click="cerrarSesion">Cerrar sesión</button>
+     <button v-if="$route.name!=='Home' && $route.name!=='Login'" @click="volverHome">Inicio</button> 
+ 
     </nav>
 
     <router-view />
@@ -17,23 +11,33 @@
 </template>
 
 <script>
-import { useAuthStore } from "@/store/authStore";
-import { useRouter } from "vue-router";
-
 export default {
-  setup() {
-    const authStore = useAuthStore();
-    const router = useRouter();
-
-    const cerrarSesion = () => {
-      authStore.logout();
-      router.push("/login"); // Redirigir al login
-    };
-
+  data() {
     return {
-      authStore,
-      cerrarSesion,
+      UserLogged: !!localStorage.getItem('userId'), 
     };
+  },
+  methods: {
+    cerrarSesion() {
+      localStorage.removeItem('userId'); 
+      this.UserLogged = false; 
+      this.$router.push("/login"); 
+    },
+    volverHome(){
+      this.$router.push("/")
+    }
+  },
+  created() {
+    this.UserLogged = !!localStorage.getItem('userId');
+  },
+  watch: {
+    UserLogged(newVal) {
+      if (newVal) {
+        localStorage.setItem('userId', ''); 
+      } else {
+        localStorage.removeItem('userId'); 
+      }
+    },
   },
 };
 </script>
