@@ -95,30 +95,38 @@ export default {
     await this.obtenerPrecios();
   },
   methods: {
-  calcularPrecio() {
-    if (this.accion === "") {
-      alert("Selecciona una acción");
-      return;
-    }
-    if (this.monedaSeleccionada === "") {
-      alert("Selecciona una moneda");
-      return;
-    }
-    if (this.exchange === "") {
-      alert("Selecciona un exchange");
-      return;
-    } else {
-      const criptoSeleccionado = this.precios.find(
-        (cripto) => cripto.nombre === this.monedaSeleccionada
-      );
-      if (criptoSeleccionado) {
+    calcularPrecio() {
+      if (this.accion === "") {
+        alert("Selecciona una accion");
+        return;
+      }
+      if (this.monedaSeleccionada === "") {
+        alert("Selecciona una moneda");
+        return;
+      }
+      if (this.exchange === "") {
+        alert("Selecciona un exchange");
+        return;
+      } else {
+        const criptoSeleccionado = this.precios.find(
+          (cripto) => cripto.nombre === this.monedaSeleccionada
+        );
+        if (criptoSeleccionado) {
         this.totalPrecio = criptoSeleccionado.precio * this.cantidad;
         this.mensajeConfirmacion = `${this.accion === "vender" ? "Venta" : "Compra"} realizada con éxito por $${this.totalPrecio}`;
-
-        // Registrar la operación en el historial aquí
+      }
+          },
+    async obtenerPrecios() {
+      try {
         const authStore = useAuthStore();
         const userId = authStore.userId;
 
+        if (!userId) {
+          alert("No hay un usuario activo. Inicia sesión nuevamente.");
+          return;
+        }
+
+        // Crear un registro de la operación
         const nuevaOperacion = {
           id: new Date().getTime(),
           usuario: userId,
@@ -138,41 +146,40 @@ export default {
 
         // Guardar nuevamente en localStorage
         localStorage.setItem(`historial_${userId}`, JSON.stringify(historial));
-      }
-    }
-  },
-  async obtenerPrecios() {
-    try {
-      //const authStore = useAuthStore();
-      const userId = localStorage.getItem("userId");
 
-      //const userId = authStore.userId;
-
-      if (!userId) {
-        alert("No hay un usuario activo. Inicia sesión nuevamente.");
-        return;
-      }
-
-      const response = await axios.get(
-        "https://api.coingecko.com/api/v3/simple/price",
-        {
-          params: {
-            ids: "bitcoin,ethereum,dogecoin",
-            vs_currencies: "ars",
-          },
+        alert("Operación registrada en el historial.");
         }
-      );
-      this.precios = [
-        { nombre: "Bitcoin", moneda: "ARS", precio: response.data.bitcoin.ars },
-        { nombre: "Ethereum", moneda: "ARS", precio: response.data.ethereum.ars },
-        { nombre: "Dogecoin", moneda: "ARS", precio: response.data.dogecoin.ars },
-      ];
-    } catch (error) {
-      console.error("Error al obtener precios:", error);
-    }
-  },
-},
+      }
+    },
+    async obtenerPrecios() {
+      try {
+        const authStore = useAuthStore();
+        const userId = authStore.userId;
 
+        if (!userId) {
+          console.error("No hay un ID de usuario disponible.");
+          return;
+        }
+
+        const response = await axios.get(
+          "https://api.coingecko.com/api/v3/simple/price",
+          {
+            params: {
+              ids: "bitcoin,ethereum,dogecoin",
+              vs_currencies: "ars",
+            },
+          }
+        );
+        this.precios = [
+          { nombre: "Bitcoin", moneda: "ARS", precio: response.data.bitcoin.ars },
+          { nombre: "Ethereum", moneda: "ARS", precio: response.data.ethereum.ars },
+          { nombre: "Dogecoin", moneda: "ARS", precio: response.data.dogecoin.ars },
+        ];
+      } catch (error) {
+        console.error("Error al obtener precios:", error);
+      }
+    },
+  },
 };
 </script>
 

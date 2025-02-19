@@ -18,14 +18,14 @@ export default {
     const userId = ref("");
 
     const iniciarSesion = () => {
-      if (userId.value.trim()) {
-        localStorage.getItem("userId", userId.value);
-        authStore.login(userId.value);
-        router.push("/CriptoPrecios");
-      } else {
-        alert("Por favor, ingrese un ID válido.");
-      }
-    };
+  if (userId.value.trim()) {
+    localStorage.setItem("userId", userId.value); // Guarda el ID correctamente
+    authStore.login(userId.value);
+    router.push("/CriptoPrecios");
+  } else {
+    alert("Por favor, ingrese un ID válido.");
+  }
+};
 
     return {
       userId,
